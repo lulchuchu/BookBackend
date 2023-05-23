@@ -2,6 +2,7 @@ package com.example.library.Controller;
 
 import com.example.library.Service.BookService;
 import com.example.library.Service.CategoryService;
+import com.example.library.model.DTO.BookDTO;
 import com.example.library.model.Entity.Book;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +32,15 @@ public class BookController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addBook(@RequestBody Book book) {
+    public ResponseEntity<?> addBook(@RequestBody BookDTO book) {
+        bookService.addBook(book);
         return ResponseEntity.ok().body("Book added successful");
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateBook(@RequestBody BookDTO book) {
+        bookService.updateBook(book);
+        return ResponseEntity.ok().body("Book updated successful");
     }
 
     @GetMapping("/category")

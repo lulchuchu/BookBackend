@@ -1,23 +1,26 @@
 package com.example.library.model.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
-public class Category {
+public class Bill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private int id;
-    private String name;
+    private LocalDateTime timeCreated;
+    private int total;
 
-    @ManyToMany
-    @JsonIgnore
-    private List<Book> books;
+    @ManyToOne
+    private User user;
+
+    @OneToMany
+    private List<BookBill> bookBills;
+
 }

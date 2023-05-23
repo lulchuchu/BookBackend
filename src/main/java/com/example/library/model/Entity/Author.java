@@ -1,15 +1,22 @@
 package com.example.library.model.Entity;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 public class Author {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private int id;
     private String name;
     @OneToMany
+    @JsonIgnore
     private List<Book> books;
 }
