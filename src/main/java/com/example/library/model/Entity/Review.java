@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,9 +12,11 @@ import java.time.LocalDateTime;
 @Setter
 public class Review {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private int score;
-    private int content;
+    @Column(length = 10000000)
+    private String content;
     private LocalDateTime date;
     @ManyToOne
     @JsonIgnore

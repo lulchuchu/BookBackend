@@ -18,6 +18,8 @@ public class Book {
     private int id;
     private String title;
     private String cover;
+    @Column(length = 100000000)
+
     private String description;
     private LocalDate releaseDate;
     private int pages;
@@ -29,9 +31,6 @@ public class Book {
 
     @OneToMany(mappedBy = "book")
     List<Review> reviews;
-
-    @ManyToMany(mappedBy = "boughtBook")
-    List<User> users;
 
     @ManyToMany
     @JoinTable(

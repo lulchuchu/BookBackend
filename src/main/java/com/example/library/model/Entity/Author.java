@@ -16,6 +16,10 @@ public class Author {
 
     private int id;
     private String name;
+    private String picture;
+    @Column(length = 100000000)
+
+    private String description;
     @OneToMany
     @JsonIgnore
     private List<Book> books;

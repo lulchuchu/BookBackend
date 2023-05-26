@@ -1,6 +1,7 @@
 package com.example.library.Service.impl;
 import com.example.library.Repository.CategoryRepo;
 import com.example.library.Service.CategoryService;
+import com.example.library.model.DTO.BookHomeDto;
 import com.example.library.model.Entity.Book;
 import com.example.library.model.Entity.Category;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<Book> showBooksByCategory(Integer categoryId) {
-        Optional<Category> category = categoryRepo.findById(categoryId);
+    public List<Book> showBooksByCategory(String categoryy) {
+        Optional<Category> category = categoryRepo.findByName(categoryy);
 
         if(category.isEmpty())
             throw new RuntimeException("Category not found");
@@ -41,4 +42,5 @@ public class CategoryServiceImpl implements CategoryService {
 
         return books;
     }
+
 }

@@ -3,24 +3,20 @@ package com.example.library.model.Entity;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
+@Table(name = "book_bill", uniqueConstraints = @UniqueConstraint(columnNames = {"book_id", "bill_id"}))
 public class BookBill {
     @Id
     private int id;
 
-    @Id
     @ManyToOne
     private Book book;
 
-    @Id
     @ManyToOne
     private Bill bill;
 

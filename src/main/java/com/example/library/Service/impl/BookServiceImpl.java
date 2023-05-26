@@ -5,9 +5,11 @@ import com.example.library.Repository.BookRepo;
 import com.example.library.Repository.CategoryRepo;
 import com.example.library.Service.BookService;
 import com.example.library.model.DTO.BookDTO;
+import com.example.library.model.DTO.BookHomeDto;
 import com.example.library.model.Entity.Author;
 import com.example.library.model.Entity.Book;
 import com.example.library.model.Entity.Category;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,21 +21,29 @@ public class BookServiceImpl implements BookService {
     private final BookRepo bookRepo;
     private final AuthorRepo authorRepo;
     private final CategoryRepo categoryRepo;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public BookServiceImpl(BookRepo bookRepo, AuthorRepo authorRepo, CategoryRepo categoryRepo) {
+    public BookServiceImpl(BookRepo bookRepo, AuthorRepo authorRepo, CategoryRepo categoryRepo, ModelMapper modelMapper) {
         this.bookRepo = bookRepo;
         this.authorRepo = authorRepo;
         this.categoryRepo = categoryRepo;
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public List<Book> getAllBooks() {
+    public List<BookHomeDto> getAllBooksHome() {
         List<Book> books = bookRepo.findAll();
         if (books.isEmpty()) {
             throw new RuntimeException("No books found");
         }
-        return books;
+        return books.stream().map(
+                (book) -> {
+                    BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
+                    bookHomeDto.setAuthorName(book.getAuthor().getName());
+                    return bookHomeDto;
+                }
+        ).toList();
     }
 
     @Override
@@ -57,8 +67,8 @@ public class BookServiceImpl implements BookService {
         }
 
         List<Category> categories = bookDTO.getCategories().stream().map(
-                (categoryId) -> {
-                    Optional<Category> category = categoryRepo.findById(categoryId);
+                (categoryName) -> {
+                    Optional<Category> category = categoryRepo.findByName(categoryName);
                     if (category.isEmpty()) {
                         throw new RuntimeException("Category not found");
                     }
@@ -92,8 +102,8 @@ public class BookServiceImpl implements BookService {
         }
 
         List<Category> categories = bookDTO.getCategories().stream().map(
-                (categoryId) -> {
-                    Optional<Category> category = categoryRepo.findById(categoryId);
+                (categoryName) -> {
+                    Optional<Category> category = categoryRepo.findByName(categoryName);
                     if (category.isEmpty()) {
                         throw new RuntimeException("Category not found");
                     }
@@ -124,8 +134,8 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<Book> getBooksByCategory(Integer categoryId) {
-        Category category = categoryRepo.findById(categoryId).get();
+    public List<Book> getBooksByCategory(Integer categoryName) {
+        Category category = categoryRepo.findById(categoryName).get();
         return category.getBooks();
     }
 
@@ -133,5 +143,29 @@ public class BookServiceImpl implements BookService {
     public List<Book> getBooksByAuthor(Integer authorId) {
         Author author = authorRepo.findById(authorId).get();
         return author.getBooks();
+    }
+
+    @Override
+    public List<BookHomeDto> getBookByCategoryId(Integer categoryId) {
+        Category category = categoryRepo.findById(categoryId).get();
+        return category.getBooks().stream().map(
+                (book) -> {
+                    BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
+                    bookHomeDto.setAuthorName(book.getAuthor().getName());
+                    return bookHomeDto;
+                }
+        ).toList();
+    }
+
+    @Override
+    public List<BookHomeDto> getBookByAuthorId(Integer authorId) {
+        List<Book> books = bookRepo.findByAuthorId(authorId);
+        return books.stream().map(
+                (book) -> {
+                    BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
+                    bookHomeDto.setAuthorName(book.getAuthor().getName());
+                    return bookHomeDto;
+                }
+        ).toList();
     }
 }

@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface CategoryService {
     public List<Category> showAllCategories();
-    public List<Book> showBooksByCategory(Integer categoryId);
+    public List<Book> showBooksByCategory(String category);
+
 }
