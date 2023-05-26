@@ -1,15 +1,8 @@
 package com.example.library.model.DTO;
 
-import com.example.library.model.Entity.Author;
-import com.example.library.model.Entity.BookBill;
-import com.example.library.model.Entity.Category;
-import com.example.library.model.Entity.Review;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.time.LocalDate;
 import java.util.List;
 

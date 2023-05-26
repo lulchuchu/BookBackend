@@ -42,5 +42,5 @@ public class Book {
 
     @OneToMany(mappedBy = "book")
     @JsonIgnore
-    private List<BookBill> bookBills;
+    private List<Bill> bills;
 }

@@ -17,7 +17,7 @@ public class Category {
     private int id;
     private String name;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "categories")
     @JsonIgnore
     private List<Book> books;
 }

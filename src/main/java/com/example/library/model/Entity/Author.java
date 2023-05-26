@@ -18,9 +18,8 @@ public class Author {
     private String name;
     private String picture;
     @Column(length = 100000000)
-
     private String description;
-    @OneToMany
+    @OneToMany(mappedBy = "author")
     @JsonIgnore
     private List<Book> books;
 }
