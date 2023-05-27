@@ -18,4 +18,6 @@ public interface BookService {
     List<BookHomeDto> getBookByCategoryId(Integer categoryId);
 
     List<BookHomeDto> getBookByAuthorId(Integer authorId);
+
+    List<BookHomeDto> searchBook(String keyword);
 }

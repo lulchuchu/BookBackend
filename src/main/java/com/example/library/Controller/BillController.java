@@ -35,6 +35,8 @@ public class BillController {
     }
 
     @PostMapping("/addtocart")
+    @CrossOrigin
+
     public ResponseEntity<?> addToCart(Authentication auth, @RequestBody BillDTO bill){
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
         BillDTO bills = billService.addToCart(userDetail.getUser(), bill);
@@ -42,6 +44,7 @@ public class BillController {
     }
 
     @PostMapping("/removefromcart")
+    @CrossOrigin
     public ResponseEntity<?> removeFromCart(Authentication auth, @RequestParam Integer billId){
         UserDetail userDetail = (UserDetail) auth.getPrincipal();
         billService.removeFromCart(userDetail.getUser(), billId);

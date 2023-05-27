@@ -13,8 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -160,6 +159,53 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<BookHomeDto> getBookByAuthorId(Integer authorId) {
         List<Book> books = bookRepo.findByAuthorId(authorId);
+        return books.stream().map(
+                (book) -> {
+                    BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
+                    bookHomeDto.setAuthorName(book.getAuthor().getName());
+                    return bookHomeDto;
+                }
+        ).toList();
+    }
+
+    @Override
+    public List<BookHomeDto> searchBook(String keyword) {
+        Set<Book> books = new HashSet<>();
+        Set<Author> authors = new HashSet<>();
+        Set<Category> categories = new HashSet<>();
+        List<String>  words = new ArrayList<>();
+        List<String> backup = new ArrayList<>();
+        List<String> bannedWords = List.of("a", "an", "the", "and", "or", "but", "nor", "for", "so", "yet", "at", "around", "by", "after", "along", "for", "from", "of", "on", "to", "with", "without");
+        for (String word: keyword.split("[.\\s-]")){
+            if(bannedWords.contains(word.toLowerCase())){
+                backup.add(word);
+                continue;
+            }
+            words.add(word);
+        }
+        if(words.isEmpty()){
+            words = backup;
+        }
+        words.forEach(
+                (word) -> {
+                    books.addAll(bookRepo.findByTitleContains(word));
+                    authors.addAll(authorRepo.findByNameContains(word));
+                    categories.addAll(categoryRepo.findByNameContains(word));
+                }
+        );
+
+        authors.forEach(
+                (author) -> {
+                    books.addAll(author.getBooks());
+                }
+        );
+
+        categories.forEach(
+                (category) -> {
+                    books.addAll(category.getBooks());
+                }
+        );
+
         return books.stream().map(
                 (book) -> {
                     BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);

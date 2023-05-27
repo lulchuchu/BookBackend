@@ -28,6 +28,12 @@ public class BookController {
         return ResponseEntity.ok().body(bookService.getAllBooksHome());
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<?> searchBook(@RequestParam String keyword) {
+        List<BookHomeDto> books= bookService.searchBook(keyword);
+        return ResponseEntity.ok().body(books);
+    }
+
     @GetMapping("/category")
     public ResponseEntity<?> getBooksByCategory(@RequestParam Integer categoryId) {
         List<BookHomeDto> books= bookService.getBookByCategoryId(categoryId);

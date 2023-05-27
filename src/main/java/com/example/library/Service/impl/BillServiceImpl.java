@@ -27,9 +27,9 @@ public class BillServiceImpl implements BillService {
         List<Bill> bills = billRepo.findByUserIdAndIsPaidIsFalse(user.getId());
         return bills.stream().map(bill -> {
             Book book = bill.getBook();
-            BillDTO billDto = new BillDTO(bill.getTimeCreated(), bill.getQuantity(), bill.getTotal(),
+            BillDTO billDto = new BillDTO(bill.getId(), bill.getTimeCreated(), bill.getQuantity(), bill.getTotal(),
                     bill.getUser().getId(), bill.getUser().getUsername(), book.getId(),
-                    bill.getBook().getTitle(), bill.getBook().getCover(), bill.getIsPaid(), book.getAuthor().getName(), book.getPrice());
+                    bill.getBook().getTitle(), bill.getBook().getCover(), bill.getIsPaid(),  book.getPrice(), book.getAuthor().getName());
             return billDto;
         }).toList();
     }
@@ -39,9 +39,9 @@ public class BillServiceImpl implements BillService {
         List<Bill> bills = billRepo.findByUserIdAndIsPaidIsTrue(user.getId());
         return bills.stream().map(bill -> {
             Book book = bill.getBook();
-            BillDTO billDto = new BillDTO(bill.getTimeCreated(), bill.getQuantity(), bill.getTotal(),
+            BillDTO billDto = new BillDTO(bill.getId(), bill.getTimeCreated(), bill.getQuantity(), bill.getTotal(),
                     bill.getUser().getId(), bill.getUser().getUsername(), book.getId(),
-                    bill.getBook().getTitle(), bill.getBook().getCover(), bill.getIsPaid(), book.getAuthor().getName(), book.getPrice());
+                    bill.getBook().getTitle(), bill.getBook().getCover(), bill.getIsPaid(),  book.getPrice(), book.getAuthor().getName());
             return billDto;
         }).toList();
     }
@@ -50,11 +50,20 @@ public class BillServiceImpl implements BillService {
     public BillDTO addToCart(User user, BillDTO bill) {
         Book book = bookRepo.findById(bill.getBookId()).get();
         float total = book.getPrice() * bill.getQuantity();
-        Bill newBill = new Bill(LocalDateTime.now(), bill.getQuantity(), total, user, book, false);
-        billRepo.save(newBill);
-        BillDTO billDto = new BillDTO(newBill.getTimeCreated(), newBill.getQuantity(), newBill.getTotal(),
-                newBill.getUser().getId(), newBill.getUser().getUsername(), book.getId(),
-                newBill.getBook().getTitle(), newBill.getBook().getCover(), newBill.getIsPaid(), book.getAuthor().getName(), book.getPrice());
+        Bill created;
+        if(billRepo.findByUserId(user.getId()).stream().anyMatch(b -> b.getBook().getId() == bill.getBookId() && !b.getIsPaid())){
+            Bill oldBill = billRepo.findByBookIdAndIsPaidFalse(bill.getBookId());
+            oldBill.setQuantity(oldBill.getQuantity() + bill.getQuantity());
+            oldBill.setTotal(oldBill.getTotal() + total);
+            created = billRepo.saveAndFlush(oldBill);
+        }else{
+            Bill newBill = new Bill(LocalDateTime.now(), bill.getQuantity(), total, user, book, false);
+            created = billRepo.saveAndFlush(newBill);
+        }
+
+        BillDTO billDto = new BillDTO(created.getId(), created.getTimeCreated(), created.getQuantity(), created.getTotal(),
+                created.getUser().getId(), created.getUser().getUsername(), book.getId(),
+                created.getBook().getTitle(), created.getBook().getCover(), created.getIsPaid(), book.getPrice(), book.getAuthor().getName());
         return billDto;
     }
 
@@ -66,8 +75,14 @@ public class BillServiceImpl implements BillService {
     @Override
     public void pay(User user, Integer billId) {
         Bill bill = billRepo.findById(billId).get();
+        Book book = bill.getBook();
+        if (book.getQuantity() >= bill.getQuantity()) {
+            book.setQuantity(book.getQuantity() - bill.getQuantity());
+        } else {
+            throw new RuntimeException("Not enough book");
+        }
         bill.setIsPaid(true);
+        bookRepo.save(book);
         billRepo.save(bill);
     }
-
 }
