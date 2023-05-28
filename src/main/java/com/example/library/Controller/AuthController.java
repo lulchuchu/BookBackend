@@ -50,6 +50,26 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sai thông tin đăng nhập");
     }
 
+    @PostMapping("/admin/login")
+    public ResponseEntity<?> adminLogin(@RequestBody User user) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtTokenProvider.generateToken(authentication);
+            User userr = userService.findByUsername(user.getUsername());
+            if(!userr.getRole().name().equals("ADMIN")){
+                throw new Exception();
+            }
+            return ResponseEntity.ok(new JwtResponse(jwt, userr.getId(), userr.getUsername(), userr.getName(), userr.getRole()));
+        }
+        catch (Exception e){
+            e.printStackTrace();
+
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sai thông tin đăng nhập");
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         if (userService.checkDuplicateEmail(user.getEmail())) {

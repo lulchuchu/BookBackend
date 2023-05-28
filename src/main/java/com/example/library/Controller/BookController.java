@@ -24,8 +24,19 @@ public class BookController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllBooks() {
+    public ResponseEntity<?> getAllBooksHome() {
         return ResponseEntity.ok().body(bookService.getAllBooksHome());
+    }
+
+    @GetMapping("/allbooks")
+    public ResponseEntity<?> getAllBooks() {
+        return ResponseEntity.ok().body(bookService.getAllBooks());
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<?> deleteBook(@RequestParam Integer bookId) {
+        bookService.deleteBook(bookId);
+        return ResponseEntity.ok().body("Delete book successfully");
     }
 
     @GetMapping("/search")

@@ -20,4 +20,6 @@ public interface BookService {
     List<BookHomeDto> getBookByAuthorId(Integer authorId);
 
     List<BookHomeDto> searchBook(String keyword);
+
+    List<BookDTO> getAllBooks();
 }

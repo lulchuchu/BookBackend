@@ -46,6 +46,24 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    public List<BookDTO> getAllBooks() {
+        List<Book> books = bookRepo.findAll();
+        if (books.isEmpty()) {
+            throw new RuntimeException("No books found");
+        }
+        return books.stream().map(
+                (book) -> {
+                    BookDTO bookDto = modelMapper.map(book, BookDTO.class);
+                    bookDto.setCategories(book.getCategories().stream().map(
+                            Category::getName
+                    ).toList());
+                    bookDto.setAuthorName(book.getAuthor().getName());
+                    return bookDto;
+                }
+        ).toList();
+    }
+
+    @Override
     public Book getBookDetails(Integer bookId) {
         Optional<Book> book = bookRepo.findById(bookId);
         if (book.isEmpty()) {
@@ -123,8 +141,6 @@ public class BookServiceImpl implements BookService {
         bookRepo.save(book);
         return book;
     }
-
-
 
     @Override
     public Book deleteBook(Integer bookId) {
@@ -214,4 +230,6 @@ public class BookServiceImpl implements BookService {
                 }
         ).toList();
     }
+
+
 }

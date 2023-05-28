@@ -16,10 +16,8 @@ public class BookDTO {
     private LocalDate releaseDate;
     private int pages;
     private float price;
-
     private String authorName;
     private int quantity;
-
     List<String> categories;
-
+    private int sold;
 }

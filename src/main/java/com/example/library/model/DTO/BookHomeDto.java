@@ -3,6 +3,8 @@ package com.example.library.model.DTO;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 public class BookHomeDto {
@@ -11,5 +13,7 @@ public class BookHomeDto {
     private String cover;
     private float price;
     private String authorName;
-
+    private int quantity;
+    private int sold;
+    private LocalDate releaseDate;
 }

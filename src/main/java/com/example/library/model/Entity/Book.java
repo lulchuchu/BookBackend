@@ -28,6 +28,7 @@ public class Book {
     @ManyToOne
     private Author author;
     private int quantity;
+    private int sold;
 
     @OneToMany(mappedBy = "book")
     List<Review> reviews;

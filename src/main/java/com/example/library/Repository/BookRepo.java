@@ -9,5 +9,9 @@ import java.util.Set;
 public interface BookRepo extends JpaRepository<Book, Integer> {
     List<Book> findByAuthorId(Integer authorId);
     Set<Book> findByTitleContains(String keyword);
-//    List<Book> findByCategoriesContains(Category category);
+
+    List<Book> findByOrderBySoldDesc();
+    List<Book> findByOrderByReleaseDateDesc();
+    List<Book> findByOrderByPriceAsc();
+    List<Book> findByOrderByPriceDesc();
 }
