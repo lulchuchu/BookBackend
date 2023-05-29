@@ -1,5 +1,6 @@
 package com.example.library.model.DTO;
 
+import com.example.library.model.Entity.Category;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,6 +19,6 @@ public class BookDTO {
     private float price;
     private String authorName;
     private int quantity;
-    List<String> categories;
+    List<Category> categories;
     private int sold;
 }

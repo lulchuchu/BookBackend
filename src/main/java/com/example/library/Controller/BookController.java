@@ -28,6 +28,26 @@ public class BookController {
         return ResponseEntity.ok().body(bookService.getAllBooksHome());
     }
 
+    @GetMapping("/all/bestseller")
+    public ResponseEntity<?> getAllBooksHomeBestSeller() {
+        return ResponseEntity.ok().body(bookService.getAllBooksHomeBestSeller());
+    }
+
+    @GetMapping("/all/new")
+    public ResponseEntity<?> getAllBooksHomeNew() {
+        return ResponseEntity.ok().body(bookService.getAllBooksHomeNew());
+    }
+
+    @GetMapping("/all/priceIncrease")
+    public ResponseEntity<?> getAllBooksHomePriceIncrease() {
+        return ResponseEntity.ok().body(bookService.getAllBooksHomePriceIncrease());
+    }
+
+    @GetMapping("/all/priceDecrease")
+    public ResponseEntity<?> getAllBooksHomePriceDecrease() {
+        return ResponseEntity.ok().body(bookService.getAllBooksHomePriceDecrease());
+    }
+
     @GetMapping("/allbooks")
     public ResponseEntity<?> getAllBooks() {
         return ResponseEntity.ok().body(bookService.getAllBooks());
@@ -68,7 +88,7 @@ public class BookController {
         return ResponseEntity.ok().body("Book added successful");
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     public ResponseEntity<?> updateBook(@RequestBody BookDTO book) {
         bookService.updateBook(book);
         return ResponseEntity.ok().body("Book updated successful");

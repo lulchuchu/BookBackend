@@ -15,4 +15,6 @@ public interface BillService {
     void removeFromCart(User user, Integer billId);
 
     void pay(User user, Integer billId);
+
+    void cancelPay(User user, Integer billId);
 }

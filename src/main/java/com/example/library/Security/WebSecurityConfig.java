@@ -53,8 +53,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().ignoringAntMatchers("/**");
         http.authorizeRequests()
                 .antMatchers("/api/file/getImage", "/login", "/register", "/admin/register", "/admin/login",
-                "/api/book/all", "/api/book/details","/api/book/search", "/api/book/category", "/api/book/author").permitAll()
-                .antMatchers("/api/book/add", "/api/book/update", "/api/book/allbooks").hasAuthority(Role.ADMIN.name())
+                "/api/book/all","/api/book/all/*", "/api/book/details","/api/book/search", "/api/book/category", "/api/book/author",
+                "/api/category/all", "/api/book/allbooks", "/api/review/book").permitAll()
+                .antMatchers("/api/book/add", "/api/book/update","/api/book/delete").hasAuthority(Role.ADMIN.name())
                 .anyRequest().authenticated()
                 .and().csrf().disable();
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

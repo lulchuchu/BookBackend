@@ -22,4 +22,12 @@ public interface BookService {
     List<BookHomeDto> searchBook(String keyword);
 
     List<BookDTO> getAllBooks();
+
+    List<BookHomeDto> getAllBooksHomeBestSeller();
+
+    List<BookHomeDto> getAllBooksHomeNew();
+
+    List<BookHomeDto> getAllBooksHomePriceIncrease();
+
+    List<BookHomeDto> getAllBooksHomePriceDecrease();
 }

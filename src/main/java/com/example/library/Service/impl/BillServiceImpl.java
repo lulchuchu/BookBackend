@@ -7,6 +7,7 @@ import com.example.library.model.DTO.BillDTO;
 import com.example.library.model.Entity.Bill;
 import com.example.library.model.Entity.Book;
 import com.example.library.model.Entity.User;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,7 +25,7 @@ public class BillServiceImpl implements BillService {
 
     @Override
     public List<BillDTO> getAllBillInCart(User user) {
-        List<Bill> bills = billRepo.findByUserIdAndIsPaidIsFalse(user.getId());
+        List<Bill> bills = billRepo.findByUserIdAndIsPaidIsFalse(user.getId(), Sort.by(Sort.Direction.DESC, "timeCreated"));
         return bills.stream().map(bill -> {
             Book book = bill.getBook();
             BillDTO billDto = new BillDTO(bill.getId(), bill.getTimeCreated(), bill.getQuantity(), bill.getTotal(),
@@ -36,7 +37,7 @@ public class BillServiceImpl implements BillService {
 
     @Override
     public List<BillDTO> getAllBillPaid(User user) {
-        List<Bill> bills = billRepo.findByUserIdAndIsPaidIsTrue(user.getId());
+        List<Bill> bills = billRepo.findByUserIdAndIsPaidIsTrue(user.getId(), Sort.by(Sort.Direction.DESC, "timeCreated"));
         return bills.stream().map(bill -> {
             Book book = bill.getBook();
             BillDTO billDto = new BillDTO(bill.getId(), bill.getTimeCreated(), bill.getQuantity(), bill.getTotal(),
@@ -55,6 +56,7 @@ public class BillServiceImpl implements BillService {
             Bill oldBill = billRepo.findByBookIdAndIsPaidFalse(bill.getBookId());
             oldBill.setQuantity(oldBill.getQuantity() + bill.getQuantity());
             oldBill.setTotal(oldBill.getTotal() + total);
+            oldBill.setTimeCreated(LocalDateTime.now());
             created = billRepo.saveAndFlush(oldBill);
         }else{
             Bill newBill = new Bill(LocalDateTime.now(), bill.getQuantity(), total, user, book, false);
@@ -78,11 +80,21 @@ public class BillServiceImpl implements BillService {
         Book book = bill.getBook();
         if (book.getQuantity() >= bill.getQuantity()) {
             book.setQuantity(book.getQuantity() - bill.getQuantity());
+            book.setSold(book.getSold() + bill.getQuantity());
         } else {
             throw new RuntimeException("Not enough book");
         }
         bill.setIsPaid(true);
         bookRepo.save(book);
         billRepo.save(bill);
+    }
+
+    @Override
+    public void cancelPay(User user, Integer billId) {
+        Bill bill = billRepo.findById(billId).get();
+        Book book = bill.getBook();
+        book.setQuantity(book.getQuantity() + bill.getQuantity());
+        book.setSold(book.getSold() - bill.getQuantity());
+        billRepo.deleteById(billId);
     }
 }

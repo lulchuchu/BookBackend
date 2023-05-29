@@ -31,6 +31,7 @@ public class Book {
     private int sold;
 
     @OneToMany(mappedBy = "book")
+    @JsonIgnore
     List<Review> reviews;
 
     @ManyToMany

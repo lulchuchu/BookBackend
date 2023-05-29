@@ -7,6 +7,7 @@ import com.example.library.model.DTO.ReviewDto;
 import com.example.library.model.Entity.Review;
 import com.example.library.model.Entity.User;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,13 +29,13 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<ReviewDto> getReviewByBookId(int bookId) {
-        List<Review> reviews = reviewRepo.findByBookId(bookId);
+        List<Review> reviews = reviewRepo.findByBookId(bookId, Sort.by(Sort.Direction.DESC, "date"));
         return reviews.stream().map((review -> {
             ReviewDto reviewDto = modelMapper.map(review, ReviewDto.class);
             reviewDto.setBookId(review.getBook().getId());
             reviewDto.setBookName(review.getBook().getTitle());
             reviewDto.setUserId(review.getUser().getId());
-            reviewDto.setUserName(review.getUser().getUsername());
+            reviewDto.setUserName(review.getUser().getName());
             return  reviewDto;
         })).toList();
     }

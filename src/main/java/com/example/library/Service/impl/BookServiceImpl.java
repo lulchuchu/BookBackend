@@ -54,11 +54,69 @@ public class BookServiceImpl implements BookService {
         return books.stream().map(
                 (book) -> {
                     BookDTO bookDto = modelMapper.map(book, BookDTO.class);
-                    bookDto.setCategories(book.getCategories().stream().map(
-                            Category::getName
-                    ).toList());
+                    bookDto.setCategories(book.getCategories());
                     bookDto.setAuthorName(book.getAuthor().getName());
                     return bookDto;
+                }
+        ).toList();
+    }
+
+    @Override
+    public List<BookHomeDto> getAllBooksHomeBestSeller() {
+        List<Book> books = bookRepo.findByOrderBySoldDesc();
+        if (books.isEmpty()) {
+            throw new RuntimeException("No books found");
+        }
+        return books.stream().map(
+                (book) -> {
+                    BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
+                    bookHomeDto.setAuthorName(book.getAuthor().getName());
+                    return bookHomeDto;
+                }
+        ).toList();
+    }
+
+    @Override
+    public List<BookHomeDto> getAllBooksHomeNew() {
+        List<Book> books = bookRepo.findByOrderByReleaseDateDesc();
+        if (books.isEmpty()) {
+            throw new RuntimeException("No books found");
+        }
+        return books.stream().map(
+                (book) -> {
+                    BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
+                    bookHomeDto.setAuthorName(book.getAuthor().getName());
+                    return bookHomeDto;
+                }
+        ).toList();
+    }
+
+    @Override
+    public List<BookHomeDto> getAllBooksHomePriceIncrease() {
+        List<Book> books = bookRepo.findByOrderByPriceAsc();
+        if (books.isEmpty()) {
+            throw new RuntimeException("No books found");
+        }
+        return books.stream().map(
+                (book) -> {
+                    BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
+                    bookHomeDto.setAuthorName(book.getAuthor().getName());
+                    return bookHomeDto;
+                }
+        ).toList();
+    }
+
+    @Override
+    public List<BookHomeDto> getAllBooksHomePriceDecrease() {
+        List<Book> books = bookRepo.findByOrderByPriceDesc();
+        if (books.isEmpty()) {
+            throw new RuntimeException("No books found");
+        }
+        return books.stream().map(
+                (book) -> {
+                    BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
+                    bookHomeDto.setAuthorName(book.getAuthor().getName());
+                    return bookHomeDto;
                 }
         ).toList();
     }
@@ -83,15 +141,7 @@ public class BookServiceImpl implements BookService {
             author = Optional.of(newAuthor);
         }
 
-        List<Category> categories = bookDTO.getCategories().stream().map(
-                (categoryName) -> {
-                    Optional<Category> category = categoryRepo.findByName(categoryName);
-                    if (category.isEmpty()) {
-                        throw new RuntimeException("Category not found");
-                    }
-                    return category.get();
-                }
-        ).toList();
+        List<Category> categories = bookDTO.getCategories();
 
         Book book = new Book();
         book.setTitle(bookDTO.getTitle());
@@ -118,15 +168,7 @@ public class BookServiceImpl implements BookService {
             author = Optional.of(newAuthor);
         }
 
-        List<Category> categories = bookDTO.getCategories().stream().map(
-                (categoryName) -> {
-                    Optional<Category> category = categoryRepo.findByName(categoryName);
-                    if (category.isEmpty()) {
-                        throw new RuntimeException("Category not found");
-                    }
-                    return category.get();
-                }
-        ).toList();
+        List<Category> categories = bookDTO.getCategories();
 
         Book book = bookRepo.findById(bookDTO.getId()).get();
         book.setTitle(bookDTO.getTitle());
@@ -141,6 +183,8 @@ public class BookServiceImpl implements BookService {
         bookRepo.save(book);
         return book;
     }
+
+
 
     @Override
     public Book deleteBook(Integer bookId) {
