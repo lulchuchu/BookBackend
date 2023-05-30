@@ -9,9 +9,9 @@ public interface UserService extends UserDetailsService {
 
     User findByUsername(String username);
 
-    Boolean checkDuplicateEmail(String email);
-
-    Boolean checkDuplicateUserName(String username);
+//    Boolean checkDuplicateEmail(String email);
+//
+//    Boolean checkDuplicateUserName(String username);
 
     void saveUser(User user);
 }

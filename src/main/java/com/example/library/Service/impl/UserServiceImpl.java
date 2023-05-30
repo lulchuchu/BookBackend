@@ -1,5 +1,7 @@
 package com.example.library.Service.impl;
 
+import com.example.library.Exception.AlreadyExistException;
+import com.example.library.Exception.NotFoundException;
 import com.example.library.Repository.UserRepo;
 import com.example.library.Security.UserDetail;
 import com.example.library.Service.UserService;
@@ -22,7 +24,7 @@ public class UserServiceImpl implements UserService {
     public UserDetails loadUserByUsername(String username) {
         User user = userRepo.findByUsername(username);
         if (user == null) {
-            throw new RuntimeException("User not found");
+            throw new NotFoundException("User not found");
         }
         return new UserDetail(user);
     }
@@ -31,25 +33,25 @@ public class UserServiceImpl implements UserService {
     public User findByUsername(String username) {
         User user = userRepo.findByUsername(username);
         if (user == null) {
-            throw new RuntimeException("User not found");
+            throw new NotFoundException("User not found");
         }
         return user;
     }
 
     @Override
-    public Boolean checkDuplicateUserName(String username) {
-        User user = userRepo.findByUsername(username);
-        return user != null;
-    }
-
-    @Override
     public void saveUser(User user) {
+        User u = userRepo.findByUsername(user.getUsername());
+        User e = userRepo.findByEmail(user.getEmail());
+        User p = userRepo.findByPhoneNumber(user.getPhoneNumber());
+        if(u != null) {
+            throw new AlreadyExistException("Username already exist");
+        }
+        if(e != null) {
+            throw new AlreadyExistException("Email already exist");
+        }
+        if(p != null) {
+            throw new AlreadyExistException("Phone number already exist");
+        }
         userRepo.save(user);
-    }
-
-    @Override
-    public Boolean checkDuplicateEmail(String email) {
-        User user = userRepo.findByEmail(email);
-        return user != null;
     }
 }

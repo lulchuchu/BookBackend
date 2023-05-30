@@ -1,5 +1,6 @@
 package com.example.library.Controller;
 
+import com.example.library.Exception.ResourceException;
 import com.example.library.Security.jwt.JwtResponse;
 import com.example.library.Security.jwt.JwtTokenProvider;
 import com.example.library.Service.UserService;
@@ -45,9 +46,8 @@ public class AuthController {
             return ResponseEntity.ok(new JwtResponse(jwt, userr.getId(), userr.getUsername(), userr.getName(), userr.getRole()));
         }
         catch (Exception e){
-            e.printStackTrace();
+            throw new ResourceException("Sai thông tin đăng nhập");
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sai thông tin đăng nhập");
     }
 
     @PostMapping("/admin/login")
@@ -59,40 +59,29 @@ public class AuthController {
             String jwt = jwtTokenProvider.generateToken(authentication);
             User userr = userService.findByUsername(user.getUsername());
             if(!userr.getRole().name().equals("ADMIN")){
-                throw new Exception();
+                throw new ResourceException("User khong co quyen truy cap");
             }
             return ResponseEntity.ok(new JwtResponse(jwt, userr.getId(), userr.getUsername(), userr.getName(), userr.getRole()));
         }
         catch (Exception e){
-            e.printStackTrace();
+            throw new ResourceException("Sai thông tin đăng nhập");
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sai thông tin đăng nhập");
 
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sai thông tin đăng nhập");
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
-        if (userService.checkDuplicateEmail(user.getEmail())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email đã tồn tại");
-        } else if (userService.checkDuplicateUserName(user.getUsername())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username đã tồn tại");
-        } else {
             Role role = Role.USER;
             String password = user.getPassword();
             user.setRole(role);
             user.setPassword(passwordEncoder.encode(password));
             userService.saveUser(user);
             return ResponseEntity.status(HttpStatus.OK).body("Created:\n" + user);
-        }
     }
 
     @PostMapping("/admin/register")
     public ResponseEntity<?> adminRegister(@RequestBody User user) {
-        if (userService.checkDuplicateEmail(user.getEmail())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email đã tồn tại");
-        } else if (userService.checkDuplicateUserName(user.getUsername())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username đã tồn tại");
-        } else {
             Role role = Role.ADMIN;
             String password = user.getPassword();
             user.setRole(role);
@@ -100,6 +89,5 @@ public class AuthController {
             userService.saveUser(user);
             return ResponseEntity.status(HttpStatus.OK).body("Created:\n" + user);
         }
-    }
 
 }

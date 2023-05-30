@@ -1,5 +1,6 @@
 package com.example.library.Service.impl;
 
+import com.example.library.Exception.NotFoundException;
 import com.example.library.Repository.AuthorRepo;
 import com.example.library.Service.AuthorService;
 import com.example.library.model.Entity.Author;
@@ -24,7 +25,7 @@ public class AuthorServiceImpl implements AuthorService {
     public List<Author> getAllAuthors() {
         List<Author> authors = authorRepo.findAll();
         if(authors.isEmpty())
-            throw new RuntimeException("No authors found");
+            throw new NotFoundException("No authors found");
         return authors;
     }
 }

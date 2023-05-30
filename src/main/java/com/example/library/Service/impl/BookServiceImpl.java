@@ -1,11 +1,13 @@
 package com.example.library.Service.impl;
 
+import com.example.library.Exception.NotFoundException;
 import com.example.library.Repository.AuthorRepo;
 import com.example.library.Repository.BookRepo;
 import com.example.library.Repository.CategoryRepo;
 import com.example.library.Service.BookService;
 import com.example.library.model.DTO.BookDTO;
 import com.example.library.model.DTO.BookHomeDto;
+import com.example.library.model.DTO.FilterDTO;
 import com.example.library.model.Entity.Author;
 import com.example.library.model.Entity.Book;
 import com.example.library.model.Entity.Category;
@@ -30,26 +32,72 @@ public class BookServiceImpl implements BookService {
         this.modelMapper = modelMapper;
     }
 
+//    @Override
+//    public List<BookHomeDto> getAllBooksHome() {
+//        List<Book> books = bookRepo.findAll();
+//        if (books.isEmpty()) {
+//            throw new NotFoundException("No books found");
+//        }
+//        return books.stream().map(
+//                (book) -> {
+//                    BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
+//                    bookHomeDto.setAuthorName(book.getAuthor().getName());
+//                    return bookHomeDto;
+//                }
+//        ).toList();
+//    }
+
     @Override
-    public List<BookHomeDto> getAllBooksHome() {
-        List<Book> books = bookRepo.findAll();
-        if (books.isEmpty()) {
-            throw new RuntimeException("No books found");
+    public List<BookHomeDto> getAllBooksHome(FilterDTO filter) {
+        List<Book> books;
+        if (filter.getKeyword() != null) {
+            books = searchBook(filter.getKeyword());
+        }else{
+            books = bookRepo.findAll();
         }
-        return books.stream().map(
-                (book) -> {
-                    BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
-                    bookHomeDto.setAuthorName(book.getAuthor().getName());
-                    return bookHomeDto;
-                }
-        ).toList();
+        if (books.isEmpty()) {
+            throw new NotFoundException("No books found");
+        }
+
+        if(filter.getAuthorId() != null){
+            Optional<Author> author = authorRepo.findById(filter.getAuthorId());
+            if(author.isPresent()){
+                books.removeIf(book -> !book.getAuthor().equals(author.get()));
+            }
+        }
+
+        if(filter.getCategoryId() != null){
+            Optional<Category> category = categoryRepo.findById(filter.getCategoryId());
+            if(category.isPresent()){
+                books.removeIf(book -> !book.getCategories().contains(category.get()));
+            }
+        }
+
+        List<BookHomeDto> bookHomeDtos = new ArrayList<>();
+        for (Book book : books) {
+            BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
+            bookHomeDto.setAuthorName(book.getAuthor().getName());
+            bookHomeDtos.add(bookHomeDto);
+        }
+        if (filter.getSort() != null) {
+            if (filter.getSort().equals("bestseller")) {
+                bookHomeDtos.sort(Comparator.comparing(BookHomeDto::getSold).reversed());
+            } else if (filter.getSort().equals("new")) {
+                bookHomeDtos.sort(Comparator.comparing(BookHomeDto::getReleaseDate).reversed());
+            } else if (filter.getSort().equals("priceIncrease")) {
+                bookHomeDtos.sort(Comparator.comparing(BookHomeDto::getPrice));
+            } else if (filter.getSort().equals("priceDecrease")) {
+                bookHomeDtos.sort(Comparator.comparing(BookHomeDto::getPrice).reversed());
+            }
+        }
+        return bookHomeDtos;
     }
 
     @Override
     public List<BookDTO> getAllBooks() {
         List<Book> books = bookRepo.findAll();
         if (books.isEmpty()) {
-            throw new RuntimeException("No books found");
+            throw new NotFoundException("No books found");
         }
         return books.stream().map(
                 (book) -> {
@@ -65,7 +113,7 @@ public class BookServiceImpl implements BookService {
     public List<BookHomeDto> getAllBooksHomeBestSeller() {
         List<Book> books = bookRepo.findByOrderBySoldDesc();
         if (books.isEmpty()) {
-            throw new RuntimeException("No books found");
+            throw new NotFoundException("No books found");
         }
         return books.stream().map(
                 (book) -> {
@@ -80,7 +128,7 @@ public class BookServiceImpl implements BookService {
     public List<BookHomeDto> getAllBooksHomeNew() {
         List<Book> books = bookRepo.findByOrderByReleaseDateDesc();
         if (books.isEmpty()) {
-            throw new RuntimeException("No books found");
+            throw new NotFoundException("No books found");
         }
         return books.stream().map(
                 (book) -> {
@@ -95,7 +143,7 @@ public class BookServiceImpl implements BookService {
     public List<BookHomeDto> getAllBooksHomePriceIncrease() {
         List<Book> books = bookRepo.findByOrderByPriceAsc();
         if (books.isEmpty()) {
-            throw new RuntimeException("No books found");
+            throw new NotFoundException("No books found");
         }
         return books.stream().map(
                 (book) -> {
@@ -110,7 +158,7 @@ public class BookServiceImpl implements BookService {
     public List<BookHomeDto> getAllBooksHomePriceDecrease() {
         List<Book> books = bookRepo.findByOrderByPriceDesc();
         if (books.isEmpty()) {
-            throw new RuntimeException("No books found");
+            throw new NotFoundException("No books found");
         }
         return books.stream().map(
                 (book) -> {
@@ -121,11 +169,13 @@ public class BookServiceImpl implements BookService {
         ).toList();
     }
 
+
+
     @Override
     public Book getBookDetails(Integer bookId) {
         Optional<Book> book = bookRepo.findById(bookId);
         if (book.isEmpty()) {
-            throw new RuntimeException("Book not found");
+            throw new NotFoundException("Book not found");
         }
         return book.get();
     }
@@ -143,16 +193,7 @@ public class BookServiceImpl implements BookService {
 
         List<Category> categories = bookDTO.getCategories();
 
-        Book book = new Book();
-        book.setTitle(bookDTO.getTitle());
-        book.setCover(bookDTO.getCover());
-        book.setDescription(bookDTO.getDescription());
-        book.setReleaseDate(bookDTO.getReleaseDate());
-        book.setPages(bookDTO.getPages());
-        book.setPrice(bookDTO.getPrice());
-        book.setAuthor(author.get());
-        book.setQuantity(bookDTO.getQuantity());
-        book.setCategories(categories);
+        Book book = new Book(bookDTO.getTitle(), bookDTO.getCover(), bookDTO.getDescription(), bookDTO.getReleaseDate(), bookDTO.getPages(), bookDTO.getPrice(),author.get(), bookDTO.getQuantity(), categories);
         bookRepo.save(book);
         return book;
     }
@@ -187,27 +228,36 @@ public class BookServiceImpl implements BookService {
 
 
     @Override
-    public Book deleteBook(Integer bookId) {
+    public String deleteBook(Integer bookId) {
         bookRepo.deleteById(bookId);
-        return null;
+        return "Delete successfully";
     }
 
     @Override
     public List<Book> getBooksByCategory(Integer categoryName) {
-        Category category = categoryRepo.findById(categoryName).get();
-        return category.getBooks();
+        Optional<Category> category = categoryRepo.findById(categoryName);
+        if (category.isEmpty()) {
+            throw new NotFoundException("Category not found");
+        }
+        return category.get().getBooks();
     }
 
     @Override
     public List<Book> getBooksByAuthor(Integer authorId) {
-        Author author = authorRepo.findById(authorId).get();
-        return author.getBooks();
+        Optional<Author> author = authorRepo.findById(authorId);
+        if (author.isEmpty()) {
+            throw new NotFoundException("Author not found");
+        }
+        return author.get().getBooks();
     }
 
     @Override
     public List<BookHomeDto> getBookByCategoryId(Integer categoryId) {
-        Category category = categoryRepo.findById(categoryId).get();
-        return category.getBooks().stream().map(
+        Optional<Category> category = categoryRepo.findById(categoryId);
+        if (category.isEmpty()) {
+            throw new NotFoundException("Category not found");
+        }
+        return category.get().getBooks().stream().map(
                 (book) -> {
                     BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
                     bookHomeDto.setAuthorName(book.getAuthor().getName());
@@ -228,8 +278,8 @@ public class BookServiceImpl implements BookService {
         ).toList();
     }
 
-    @Override
-    public List<BookHomeDto> searchBook(String keyword) {
+//    @Override
+    public List<Book> searchBook(String keyword) {
         Set<Book> books = new HashSet<>();
         Set<Author> authors = new HashSet<>();
         Set<Category> categories = new HashSet<>();
@@ -266,13 +316,7 @@ public class BookServiceImpl implements BookService {
                 }
         );
 
-        return books.stream().map(
-                (book) -> {
-                    BookHomeDto bookHomeDto = modelMapper.map(book, BookHomeDto.class);
-                    bookHomeDto.setAuthorName(book.getAuthor().getName());
-                    return bookHomeDto;
-                }
-        ).toList();
+        return new ArrayList<>(books);
     }
 
 

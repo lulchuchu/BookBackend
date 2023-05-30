@@ -8,7 +8,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class FilterDTO {
-    private Boolean bestSeller;
-    private Boolean releaseDateSort;
-    private Boolean priceSortIncrease;
+    private String sort;
+    private Integer authorId;
+    private Integer categoryId;
+    private String keyword;
 }

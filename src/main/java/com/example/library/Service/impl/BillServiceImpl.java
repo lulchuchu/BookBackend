@@ -1,5 +1,7 @@
 package com.example.library.Service.impl;
 
+import com.example.library.Exception.NotFoundException;
+import com.example.library.Exception.ResourceException;
 import com.example.library.Repository.BillRepo;
 import com.example.library.Repository.BookRepo;
 import com.example.library.Service.BillService;
@@ -10,8 +12,10 @@ import com.example.library.model.Entity.User;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BillServiceImpl implements BillService {
@@ -49,8 +53,15 @@ public class BillServiceImpl implements BillService {
 
     @Override
     public BillDTO addToCart(User user, BillDTO bill) {
-        Book book = bookRepo.findById(bill.getBookId()).get();
-        float total = book.getPrice() * bill.getQuantity();
+
+        Optional<Book> book = bookRepo.findById(bill.getBookId());
+        if (book.isEmpty()) {
+            throw new NotFoundException("Book not found");
+        }
+        if(book.get().getQuantity() < bill.getQuantity()){
+            throw new ResourceException("Not enough book in stock");
+        }
+        float total = book.get().getPrice() * bill.getQuantity();
         Bill created;
         if(billRepo.findByUserId(user.getId()).stream().anyMatch(b -> b.getBook().getId() == bill.getBookId() && !b.getIsPaid())){
             Bill oldBill = billRepo.findByBookIdAndIsPaidFalse(bill.getBookId());
@@ -59,13 +70,13 @@ public class BillServiceImpl implements BillService {
             oldBill.setTimeCreated(LocalDateTime.now());
             created = billRepo.saveAndFlush(oldBill);
         }else{
-            Bill newBill = new Bill(LocalDateTime.now(), bill.getQuantity(), total, user, book, false);
+            Bill newBill = new Bill(LocalDateTime.now(), bill.getQuantity(), total, user, book.get(), false);
             created = billRepo.saveAndFlush(newBill);
         }
 
         BillDTO billDto = new BillDTO(created.getId(), created.getTimeCreated(), created.getQuantity(), created.getTotal(),
-                created.getUser().getId(), created.getUser().getUsername(), book.getId(),
-                created.getBook().getTitle(), created.getBook().getCover(), created.getIsPaid(), book.getPrice(), book.getAuthor().getName());
+                created.getUser().getId(), created.getUser().getUsername(), book.get().getId(),
+                created.getBook().getTitle(), created.getBook().getCover(), created.getIsPaid(), book.get().getPrice(), book.get().getAuthor().getName());
         return billDto;
     }
 
@@ -76,25 +87,32 @@ public class BillServiceImpl implements BillService {
 
     @Override
     public void pay(User user, Integer billId) {
-        Bill bill = billRepo.findById(billId).get();
-        Book book = bill.getBook();
-        if (book.getQuantity() >= bill.getQuantity()) {
-            book.setQuantity(book.getQuantity() - bill.getQuantity());
-            book.setSold(book.getSold() + bill.getQuantity());
-        } else {
-            throw new RuntimeException("Not enough book");
+        Optional<Bill> bill = billRepo.findById(billId);
+        if (bill.isEmpty()) {
+            throw new NotFoundException("Bill not found");
         }
-        bill.setIsPaid(true);
+        Book book = bill.get().getBook();
+        if(book.getQuantity() < bill.get().getQuantity()){
+            throw new ResourceException("Not enough book in stock");
+        }
+//        if (book.getQuantity() >= bill.get().getQuantity()) {
+        book.setQuantity(book.getQuantity() - bill.get().getQuantity());
+        book.setSold(book.getSold() + bill.get().getQuantity());
+        bill.get().setIsPaid(true);
+
         bookRepo.save(book);
-        billRepo.save(bill);
+        billRepo.save(bill.get());
     }
 
     @Override
     public void cancelPay(User user, Integer billId) {
-        Bill bill = billRepo.findById(billId).get();
-        Book book = bill.getBook();
-        book.setQuantity(book.getQuantity() + bill.getQuantity());
-        book.setSold(book.getSold() - bill.getQuantity());
+        Optional<Bill> bill = billRepo.findById(billId);
+        if (bill.isEmpty()) {
+            throw new NotFoundException("Bill not found");
+        }
+        Book book = bill.get().getBook();
+        book.setQuantity(book.getQuantity() + bill.get().getQuantity());
+        book.setSold(book.getSold() - bill.get().getQuantity());
         billRepo.deleteById(billId);
     }
 }

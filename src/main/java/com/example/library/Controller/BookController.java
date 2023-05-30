@@ -4,11 +4,13 @@ import com.example.library.Service.BookService;
 import com.example.library.Service.CategoryService;
 import com.example.library.model.DTO.BookDTO;
 import com.example.library.model.DTO.BookHomeDto;
+import com.example.library.model.DTO.FilterDTO;
 import com.example.library.model.Entity.Book;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.logging.Filter;
 
 @RestController
 @RequestMapping("/api/book")
@@ -23,10 +25,15 @@ public class BookController {
         this.categoryService = categoryService;
     }
 
+//    @GetMapping("/all")
+//    public ResponseEntity<?> getAllBooksHome() {
+//        return ResponseEntity.ok().body(bookService.getAllBooksHome());
+//    }
+
     @GetMapping("/all")
-    public ResponseEntity<?> getAllBooksHome() {
-        return ResponseEntity.ok().body(bookService.getAllBooksHome());
-    }
+    public ResponseEntity<?> getAllBooksHome(FilterDTO filterDto) {
+        return ResponseEntity.ok().body(bookService.getAllBooksHome(filterDto));
+  }
 
     @GetMapping("/all/bestseller")
     public ResponseEntity<?> getAllBooksHomeBestSeller() {
@@ -59,11 +66,11 @@ public class BookController {
         return ResponseEntity.ok().body("Delete book successfully");
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<?> searchBook(@RequestParam String keyword) {
-        List<BookHomeDto> books= bookService.searchBook(keyword);
-        return ResponseEntity.ok().body(books);
-    }
+//    @GetMapping("/search")
+//    public ResponseEntity<?> searchBook(@RequestParam String keyword) {
+//        List<BookHomeDto> books= bookService.searchBook(keyword);
+//        return ResponseEntity.ok().body(books);
+//    }
 
     @GetMapping("/category")
     public ResponseEntity<?> getBooksByCategory(@RequestParam Integer categoryId) {

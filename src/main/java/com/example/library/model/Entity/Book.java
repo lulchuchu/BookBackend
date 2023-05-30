@@ -2,6 +2,7 @@ package com.example.library.model.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -11,6 +12,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,4 +47,16 @@ public class Book {
     @OneToMany(mappedBy = "book")
     @JsonIgnore
     private List<Bill> bills;
+
+    public Book(String title, String cover, String description, LocalDate releaseDate, int pages, float price, Author author, int quantity, List<Category> categories) {
+        this.title = title;
+        this.cover = cover;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.pages = pages;
+        this.price = price;
+        this.author = author;
+        this.quantity = quantity;
+        this.categories = categories;
+    }
 }

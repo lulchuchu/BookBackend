@@ -1,5 +1,6 @@
 package com.example.library.Service.impl;
 
+import com.example.library.Exception.ResourceException;
 import com.example.library.Service.FileStorageService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -39,11 +40,11 @@ public class FileStorageServiceImpl implements FileStorageService {
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
-                throw new RuntimeException("Could not read the file!");
+                throw new ResourceException("Could not read the file!");
             }
 
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Error: " + e.getMessage());
+            throw new ResourceException("Error: " + e.getMessage());
         }
     }
 
