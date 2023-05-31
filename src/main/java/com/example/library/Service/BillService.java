@@ -17,4 +17,6 @@ public interface BillService {
     void pay(User user, Integer billId);
 
     void cancelPay(User user, Integer billId);
+
+    void changeQuantity(User user, Integer billId, Integer quantity);
 }

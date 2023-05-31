@@ -64,4 +64,11 @@ public class BillController {
         billService.cancelPay(userDetail.getUser(), billId);
         return ResponseEntity.ok("Remove successfully");
     }
+
+    @PostMapping("/changeQuantity")
+    public ResponseEntity<?> changeQuantity(Authentication auth, @RequestParam Integer billId, @RequestParam Integer quantity){
+        UserDetail userDetail = (UserDetail) auth.getPrincipal();
+        billService.changeQuantity(userDetail.getUser(), billId, quantity);
+        return ResponseEntity.ok("Change successfully");
+    }
 }

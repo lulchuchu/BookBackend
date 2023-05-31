@@ -1,5 +1,6 @@
 package com.example.library.Service.impl;
 
+import com.example.library.Exception.AlreadyExistException;
 import com.example.library.Exception.NotFoundException;
 import com.example.library.Repository.AuthorRepo;
 import com.example.library.Repository.BookRepo;
@@ -182,7 +183,11 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book addBook(BookDTO bookDTO) {
-        Optional<Author> author = authorRepo.findByName(bookDTO.getAuthorName());
+        if(bookRepo.findByTitleAndAuthorName(bookDTO.getTitle(), bookDTO.getAuthorName()) != null){
+            throw new AlreadyExistException("Book already exists");
+        }
+
+        Optional<Author> author = authorRepo.findByNameIgnoreCase(bookDTO.getAuthorName());
 
         if (author.isEmpty()) {
             Author newAuthor = new Author();
@@ -200,8 +205,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book updateBook(BookDTO bookDTO) {
-        Optional<Author> author = authorRepo.findByName(bookDTO.getAuthorName());
-
+        Optional<Author> author = authorRepo.findByNameIgnoreCase(bookDTO.getAuthorName());
         if (author.isEmpty()) {
             Author newAuthor = new Author();
             newAuthor.setName(bookDTO.getAuthorName());
@@ -299,7 +303,7 @@ public class BookServiceImpl implements BookService {
         words.forEach(
                 (word) -> {
                     books.addAll(bookRepo.findByTitleContains(word));
-                    authors.addAll(authorRepo.findByNameContains(word));
+                    authors.addAll(authorRepo.findByNameContainsIgnoreCase(word));
                     categories.addAll(categoryRepo.findByNameContains(word));
                 }
         );

@@ -59,7 +59,7 @@ public class BillServiceImpl implements BillService {
             throw new NotFoundException("Book not found");
         }
         if(book.get().getQuantity() < bill.getQuantity()){
-            throw new ResourceException("Not enough book in stock");
+            throw new ResourceException("Not enough book in stock, only " +book.get().getQuantity()+ " left");
         }
         float total = book.get().getPrice() * bill.getQuantity();
         Bill created;
@@ -93,7 +93,7 @@ public class BillServiceImpl implements BillService {
         }
         Book book = bill.get().getBook();
         if(book.getQuantity() < bill.get().getQuantity()){
-            throw new ResourceException("Not enough book in stock");
+            throw new ResourceException("Not enough book in stock, only " +book.getQuantity()+ " left");
         }
 //        if (book.getQuantity() >= bill.get().getQuantity()) {
         book.setQuantity(book.getQuantity() - bill.get().getQuantity());
@@ -114,5 +114,21 @@ public class BillServiceImpl implements BillService {
         book.setQuantity(book.getQuantity() + bill.get().getQuantity());
         book.setSold(book.getSold() - bill.get().getQuantity());
         billRepo.deleteById(billId);
+    }
+
+    @Override
+    public void changeQuantity(User user, Integer billId, Integer quantity) {
+        Optional<Bill> bill = billRepo.findById(billId);
+        if (bill.isEmpty()) {
+            throw new NotFoundException("Bill not found");
+        }
+        Book book = bill.get().getBook();
+        if(book.getQuantity() < quantity){
+            throw new ResourceException("Not enough book in stock, only " +book.getQuantity()+ " left");
+        }
+        float total = book.getPrice() * quantity;
+        bill.get().setQuantity(quantity);
+        bill.get().setTotal(total);
+        billRepo.save(bill.get());
     }
 }

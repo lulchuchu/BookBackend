@@ -8,5 +8,7 @@ import java.util.Optional;
 
 public interface AuthorRepo extends JpaRepository<Author, Integer> {
     Optional<Author> findByName(String name);
-    List<Author> findByNameContains(String keyword);
+    List<Author> findByNameContainsIgnoreCase(String keyword);
+    Optional<Author> findByNameIgnoreCase(String keyword);
+
 }

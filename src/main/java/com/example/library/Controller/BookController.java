@@ -100,10 +100,4 @@ public class BookController {
         bookService.updateBook(book);
         return ResponseEntity.ok().body("Book updated successful");
     }
-
-//    @GetMapping("/category")
-//    public ResponseEntity<?> getBooksByCategory(@RequestParam String categoryName) {
-//        List<Book> books= categoryService.showBooksByCategory(categoryName);
-//        return ResponseEntity.ok().body(books);
-//    }
 }
